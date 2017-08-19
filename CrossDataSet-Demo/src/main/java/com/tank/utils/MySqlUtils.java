@@ -6,9 +6,7 @@ package com.tank.utils;/*                                                       
 **                                                                      **
 \*                                                                      */
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.Properties;
 
 public class MySqlUtils {
@@ -18,17 +16,25 @@ public class MySqlUtils {
     }
 
     public void dropTableIfExists(String tableName) {
-        this.createConn();
+        try(Connection conn = this.createConn()){
+          Statement pst = conn.createStatement();
+            String sql = "drop table if exists " + tableName;
+            pst.executeUpdate(sql);
+        }catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
     }
 
     public  void createTable(String table) {
-        this.createConn();
+
     }
 
     public  void initDefaultTable() {
-        String table = "";
+
+        Properties prop = PropertyUtils.instance().getProperties("mysql.properties");
+        String table = prop.getProperty("mysql.table.person");
         this.dropTableIfExists(table);
-        this.createTable(table);
+        //this.createTable(table);
 
     }
 

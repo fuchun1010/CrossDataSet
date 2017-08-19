@@ -1,5 +1,8 @@
 ```
 mvn clean
 mvn compile
-mvn package
+
 ```
+
+## package
+sudo mvn package
