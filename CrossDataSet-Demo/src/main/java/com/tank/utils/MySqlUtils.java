@@ -7,7 +7,10 @@ package com.tank.utils;/*                                                       
 \*                                                                      */
 
 import java.sql.*;
+import java.util.Optional;
 import java.util.Properties;
+import java.util.Random;
+import java.util.stream.IntStream;
 
 public class MySqlUtils {
 
@@ -15,33 +18,68 @@ public class MySqlUtils {
         return instance;
     }
 
-    public void dropTableIfExists(String tableName) {
-        try(Connection conn = this.createConn()){
-          Statement pst = conn.createStatement();
-            String sql = "drop table if exists " + tableName;
-            pst.executeUpdate(sql);
-        }catch (SQLException e) {
+    public  void initDefaultTable() {
+        Optional<Connection> opt = this.createConn();
+        Properties prop = PropertyUtils.instance().getProperties("mysql.properties");
+        String[] locations = {"北京", "上海", "广州", "深圳"};
+        if(!opt.isPresent())
+            return;
+
+        try(Connection conn = opt.get()) {
+            String table = prop.getProperty("mysql.table.location");
+            int maxRows = Integer.parseInt(prop.getProperty("mysql.table.location.max_rows"));
+            String sql = "insert into " + table + " ( _name ) values(?)";
+            final PreparedStatement ps = conn.prepareStatement(sql);
+            IntStream.range(0, maxRows).forEach( i -> {
+                try{
+                    ps.setString(1, locations[i]);
+                    ps.addBatch();
+                    ps.clearParameters();
+                }
+                catch (SQLException e) {
+                    System.out.println(e.getMessage());
+                }
+            });
+            ps.executeBatch();
+
+            ps.clearBatch();
+            ps.close();
+
+            table = prop.getProperty("mysql.table.person");
+            maxRows = Integer.parseInt(prop.getProperty("mysql.table.person.max_rows"));
+            sql = "insert into " + table + " ( _name, _salory, _location_id) values(?, ?, ?)";
+            Integer[] salories = {1000,1500,2300,5300};
+            Integer[] locationsIds = {1,2,3,4};
+            final PreparedStatement p2 = conn.prepareStatement(sql);
+            IntStream.range(0, maxRows).forEach(i -> {
+                try{
+                    int salory = this.random(salories);
+                    int locationId = this.random(locationsIds);
+                    p2.setString(1, "name_" + i);
+                    p2.setInt(2, salory);
+                    p2.setInt(3, locationId);
+                    p2.addBatch();
+                }
+                catch (SQLException e) {
+                    System.out.print(e.getMessage());
+                }
+            });
+            p2.executeBatch();
+            p2.close();
+        }
+        catch (SQLException e) {
             System.out.println(e.getMessage());
         }
     }
 
-    public  void createTable(String table) {
-
+    private<T> T random(T[] arr) {
+        Random random = new Random();
+        int index  = random.nextInt(arr.length);
+        return arr[index];
     }
 
-    public  void initDefaultTable() {
-
-        Properties prop = PropertyUtils.instance().getProperties("mysql.properties");
-        String table = prop.getProperty("mysql.table.person");
-        this.dropTableIfExists(table);
-        //this.createTable(table);
-
-    }
-
-    private   Connection createConn() {
-        Connection conn = null;
-        //TODO not correct mysql connection
-
+    private Optional<Connection> createConn() {
+        Optional<Connection> opt = Optional.empty();
         Properties prop = PropertyUtils.instance().getProperties("mysql.properties");
         try{
             String driver = prop.getProperty("mysql.driver");
@@ -49,13 +87,13 @@ public class MySqlUtils {
             String user = prop.getProperty("mysql.user");
             String password = prop.getProperty("mysql.password");
             Class.forName(driver);
-            conn = DriverManager.getConnection(url, user, password);
-            return conn;
+            Connection conn = DriverManager.getConnection(url, user, password);
+            return opt.of(conn);
         }
         catch (ClassNotFoundException | SQLException e) {
             System.out.print(e.toString());
         }
-        return conn;
+        return opt;
     }
 
     private static MySqlUtils instance = new MySqlUtils();
