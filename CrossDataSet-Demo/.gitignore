@@ -2,3 +2,5 @@
 CrossDataSetDemo.iml
 target
 target/
+derby.log
+metastore_db/

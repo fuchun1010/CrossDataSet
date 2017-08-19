@@ -21,7 +21,7 @@ public class SparkUtils {
     public Dataset create() throws  Exception{
         Properties prop = PropertyUtils.instance().getProperties("mysql.properties");
 
-        SparkConf conf = new SparkConf().setMaster("local").setAppName("CrossDataSet");
+        SparkConf conf = new SparkConf().setMaster("local[*]").setAppName("CrossDataSet");
         SparkContext sc = new SparkContext(conf);
         Class.forName(prop.getProperty("mysql.driver"));
         SQLContext sql = new SQLContext(sc);
