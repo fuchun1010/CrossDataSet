@@ -11,6 +11,8 @@ public class App
     public static void main( String[] args )
     {
         MySqlUtils mySqlUtils = MySqlUtils.instance();
-        mySqlUtils.initDefaultTable();
+        /*第一次需要初始化数据库，以后运行不需要*/
+        boolean needStart = false;
+        mySqlUtils.initDefaultTable(needStart);
     }
 }

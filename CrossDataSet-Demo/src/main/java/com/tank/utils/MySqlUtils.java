@@ -18,7 +18,10 @@ public class MySqlUtils {
         return instance;
     }
 
-    public  void initDefaultTable() {
+    public  void initDefaultTable(boolean init ) {
+        if(!init) {
+            return;
+        }
         Optional<Connection> opt = this.createConn();
         Properties prop = PropertyUtils.instance().getProperties("mysql.properties");
         String[] locations = {"北京", "上海", "广州", "深圳"};
