@@ -24,13 +24,13 @@ public class MySqlUtils {
         }
         Optional<Connection> opt = this.createConn();
         Properties prop = PropertyUtils.instance().getProperties("mysql.properties");
-        String[] locations = {"北京", "上海", "广州", "深圳"};
+        String[] locations = {"北京", "上海", "广州", "深圳", "重庆", "四川", "云南"};
         if(!opt.isPresent())
             return;
 
         try(Connection conn = opt.get()) {
             String table = prop.getProperty("mysql.table.location");
-            int maxRows = Integer.parseInt(prop.getProperty("mysql.table.location.max_rows"));
+            int maxRows = locations.length;
             String sql = "insert into " + table + " ( _name ) values(?)";
             final PreparedStatement ps = conn.prepareStatement(sql);
             IntStream.range(0, maxRows).forEach( i -> {
@@ -43,23 +43,23 @@ public class MySqlUtils {
                     System.out.println(e.getMessage());
                 }
             });
-            ps.executeBatch();
-
+            int[] batch = ps.executeBatch();
+            System.out.println("batch size is:" + batch);
             ps.clearBatch();
             ps.close();
 
             table = prop.getProperty("mysql.table.person");
             maxRows = Integer.parseInt(prop.getProperty("mysql.table.person.max_rows"));
             sql = "insert into " + table + " ( _name, _salory, _location_id) values(?, ?, ?)";
-            Integer[] salories = {1000,1500,2300,5300};
+            Integer[] salaries = {1000,1500,2300,5300};
             Integer[] locationsIds = {1,2,3,4};
             final PreparedStatement p2 = conn.prepareStatement(sql);
             IntStream.range(0, maxRows).forEach(i -> {
                 try{
-                    int salory = this.random(salories);
+                    int salary = this.random(salaries);
                     int locationId = this.random(locationsIds);
                     p2.setString(1, "name_" + i);
-                    p2.setInt(2, salory);
+                    p2.setInt(2, salary);
                     p2.setInt(3, locationId);
                     p2.addBatch();
                 }
