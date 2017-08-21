@@ -1,3 +1,10 @@
+### init step when first start project
+
+##### run scr/resources/init.sql
+
+
+### command
+
 ```
 mvn clean
 mvn compile
