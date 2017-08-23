@@ -8,70 +8,39 @@ package com.tank.utils;
 \*                                                                      */
 
 
+import org.apache.hadoop.yarn.webapp.hamlet.Hamlet;
 import org.apache.spark.SparkConf;
-import org.apache.spark.SparkContext;
-import org.apache.spark.sql.Dataset;
+import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.sql.DataFrameReader;
 import org.apache.spark.sql.SQLContext;
+import org.apache.spark.sql.SparkSession;
 
 
-import javax.swing.text.html.Option;
-import java.util.Optional;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
-import java.util.stream.IntStream;
 
 public class SparkUtils {
 
-    public Optional<Dataset> innerJoinTwoDataSet(String tableA, String tableB) throws  Exception{
-      Optional<Dataset> opt = Optional.empty();
-      SQLContext sqlContext = this.createSqlContext();
-      Properties prop = PropertyUtils.instance().getProperties("mysql.properties");
-      String url = prop.getProperty("mysql.url");
-      //TODO manual map reduce data
-      long rowsA = 5000000;
-      long rowsB = 7;
-      long unit = 500;
-
-      while(rowsA > 500) {
+  public static SparkUtils getInstance() {
+    return instance;
+  }
 
 
-      }
+  private static SparkUtils instance = new SparkUtils();
 
-      return opt;
+  private SparkUtils() {
+
+  }
+
+  public DataFrameReader createSqlContext() {
+    SparkSession spark = SparkSession.builder().master("local[*]").appName("CrossDataSet").getOrCreate();
+    Properties props = PropertyUtils.instance().getProperties("mysql.properties");
+    Map<String, String> options = new HashMap<>();
+    for (Map.Entry entry : props.entrySet()) {
+      options.put((String) entry.getKey(), (String) entry.getValue());
     }
+    return spark.read().format("jdbc").options(options);
+  }
 
-    public Dataset create() throws  Exception{
-        Properties prop = PropertyUtils.instance().getProperties("mysql.properties");
-
-
-        SQLContext sql = this.createSqlContext();
-
-        Properties connectProps = new Properties();
-        String url = prop.getProperty("mysql.url");
-        String person = prop.getProperty("mysql.table.person");
-        connectProps.put("user", prop.getProperty("mysql.user"));
-        connectProps.put("password", prop.getProperty("mysql.password"));
-
-        return sql.read().jdbc(url, person, connectProps);
-    }
-
-    public  static SparkUtils getInstance() {
-        return instance;
-    }
-
-
-    private SQLContext createSqlContext() throws  Exception{
-      Properties prop = PropertyUtils.instance().getProperties("mysql.properties");
-      SparkConf conf = new SparkConf().setMaster("local[*]").setAppName("CrossDataSet");
-      SparkContext sc = new SparkContext(conf);
-      Class.forName(prop.getProperty("mysql.driver"));
-      SQLContext sql = new SQLContext(sc);
-
-      return sql;
-    }
-
-    private static  SparkUtils instance = new SparkUtils();
-
-    private  SparkUtils() {
-
-    }
 }

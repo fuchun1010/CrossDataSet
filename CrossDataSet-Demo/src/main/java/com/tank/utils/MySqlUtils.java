@@ -85,10 +85,10 @@ public class MySqlUtils {
         Optional<Connection> opt = Optional.empty();
         Properties prop = PropertyUtils.instance().getProperties("mysql.properties");
         try{
-            String driver = prop.getProperty("mysql.driver");
-            String url = prop.getProperty("mysql.url");
-            String user = prop.getProperty("mysql.user");
-            String password = prop.getProperty("mysql.password");
+            String driver = prop.getProperty("driver");
+            String url = prop.getProperty("url");
+            String user = prop.getProperty("user");
+            String password = prop.getProperty("password");
             Class.forName(driver);
             Connection conn = DriverManager.getConnection(url, user, password);
             return opt.of(conn);
