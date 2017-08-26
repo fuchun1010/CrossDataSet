@@ -8,17 +8,13 @@ package com.tank.utils;
 \*                                                                      */
 
 
-import org.apache.hadoop.yarn.webapp.hamlet.Hamlet;
-import org.apache.spark.SparkConf;
-import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.sql.DataFrameReader;
-import org.apache.spark.sql.SQLContext;
 import org.apache.spark.sql.SparkSession;
 
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class SparkUtils {
 
@@ -26,21 +22,31 @@ public class SparkUtils {
     return instance;
   }
 
-
-  private static SparkUtils instance = new SparkUtils();
-
-  private SparkUtils() {
-
+  public SparkSession createSparSession() {
+    SparkSession sparkSession = SparkSession.builder().master("local[*]").appName("CrossDataSet").getOrCreate();
+    return sparkSession;
   }
 
-  public DataFrameReader createSqlContext() {
-    SparkSession spark = SparkSession.builder().master("local[*]").appName("CrossDataSet").getOrCreate();
+  public DataFrameReader createDetaultDataFrame(SparkSession spark) {
+
+    return spark.read().format("jdbc").options(this.options);
+  }
+
+  private SparkUtils() {
+    this.options = this.initMySQlConfig();
+  }
+
+  private ConcurrentHashMap<String, String> initMySQlConfig() {
     Properties props = PropertyUtils.instance().getProperties("mysql.properties");
-    Map<String, String> options = new HashMap<>();
+    ConcurrentHashMap<String, String> options = new ConcurrentHashMap<>();
     for (Map.Entry entry : props.entrySet()) {
       options.put((String) entry.getKey(), (String) entry.getValue());
     }
-    return spark.read().format("jdbc").options(options);
+    return options;
   }
+
+  private static SparkUtils instance = new SparkUtils();
+
+  private ConcurrentHashMap<String, String> options = null;
 
 }
