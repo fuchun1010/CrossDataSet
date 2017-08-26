@@ -15,6 +15,7 @@ import org.apache.spark.sql.SparkSession;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 
 public class SparkUtils {
 
@@ -25,6 +26,12 @@ public class SparkUtils {
   public SparkSession createSparSession() {
     SparkSession sparkSession = SparkSession.builder().master("local[*]").appName("CrossDataSet").getOrCreate();
     return sparkSession;
+  }
+
+  public synchronized  DataFrameReader createDataFrame(String sql, SparkSession sparkSession) {
+    this.options.remove("dbtable");
+    this.options.putIfAbsent("dbtable", sql);
+    return sparkSession.read().format("jdbc").options(this.options);
   }
 
   public DataFrameReader createDetaultDataFrame(SparkSession spark) {
