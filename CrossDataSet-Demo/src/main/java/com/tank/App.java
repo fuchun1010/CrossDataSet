@@ -12,7 +12,6 @@ public class App {
   public static void main(String[] args) throws Exception {
     SparkUtils sparkUtils = SparkUtils.getInstance();
     SparkSession sparkSession = sparkUtils.createSparSession();
-    //sparkUtils.createDetaultDataFrame(sparkSession).load().show();
     DataExtractor dataExtractor = new DataExtractor("_person");
     int pageNo = 3;
     IntStream.range(1, pageNo).mapToObj(dataExtractor::genSqlWithPageNo).forEach(sql -> {
